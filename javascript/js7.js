@@ -1,10 +1,11 @@
 
 /* ---------------------- Elementos de html ---------------------- */
 
-// main, nav y div en-blanco
+// main, nav y div en-blanco y botones
 const main = document.querySelector('main');
 const nav = document.querySelector('nav');
 const enBlanco = document.querySelector('#en-blanco');
+const divBotones = document.querySelector('#botones');
 
 // Botón para desplegar la navegación emergente
 const btnEmergente = document.getElementById('emergente');
@@ -66,8 +67,8 @@ const bordesMuros = [muroGrande.getBoundingClientRect(), muroMediano1.getBoundin
 
 /* Ricardo */
 const ricardo = document.getElementById('ricardo');
-ricardo.style.left = 20 + 'px';
-ricardo.style.top = altoZonaJuego - 60 + 'px';
+ricardo.style.left = 60 + 'px';
+ricardo.style.top = altoZonaJuego - 80 + 'px';
 let tamanyoRicardo = 30;
 
 /* Kebab */
@@ -76,6 +77,34 @@ let tamanyoKebab = 40;
 
 /* Contador */
 const contador = document.getElementById('contador');
+
+/* Reset */
+const reset = document.getElementById('reset');
+// Asignamos el evento al botón
+reset.addEventListener('click', resetea);
+
+/* Personajes Ricardo */
+let personajes = [];
+personajes.push('../images/ricardo.png');
+personajes.push('../images/ricarda.png');
+personajes.push('../images/ricardios.png');
+personajes.push('../images/ricardo-elegante.png');
+personajes.push('../images/ricardo-fiestas.png');
+personajes.push('../images/ricardo-navidad.png');
+personajes.push('../images/ricardo-pelo.png');
+personajes.push('../images/ricardo-pixel.png');
+
+// Comprobamos las cookies para saber si hay algún ricardo seleccionado
+let cookies = document.cookie;
+if (cookies !== ''){
+    let arrayCookies = cookies.split(';');
+    for (let i = 0; i < arrayCookies.length; i++){
+        if (arrayCookies[i].includes('ricardo')){
+            let numero = Number(arrayCookies[i].split('=')[1]);
+            ricardo.src = personajes[numero];
+        }
+    }
+}
 
 /* 
 La lógica es la siguiente: Le añado un evento de click a ricardo que solo funciona 1 vez hasta darle a reset.
@@ -98,8 +127,6 @@ let bordeRicardo;
 let bordeKebab;
 
 /* Inicio del juego */
-
-
 
 ricardo.addEventListener('click', asignaInicio);
 
@@ -128,9 +155,9 @@ function comienzaJuego(event){
     for (let i = 0; i < discoteca.length; i++){
         discoteca[i].style.display = 'inline';
     }
+    ricardo.style.left = (event.clientX - divBotones.offsetWidth) + 'px';
+    ricardo.style.top = (event.clientY - divBotones.offsetTop - (ricardo.offsetHeight / 2)) + 'px'; 
 
-        ricardo.style.left = 'calc( ' + event.clientX + 'px - 10vw)';
-        ricardo.style.top = 'calc( ' + event.clientY + 'px - 17vh)';;
     }
 
     // Comprobamos nuestro array de bordes de los muros. Además, comprobamos los bordes de la zona de juego
@@ -172,6 +199,9 @@ function finalizaJuego(){
     main.removeEventListener('mousemove', comienzaJuego);
     // Paramos de mostrar kebabs
     clearInterval(intervaloTimerKebab);
+    // Quitamos el kebab y su Timeout
+    clearTimeout(desapareceKebab);
+    kebab.style.display = 'none';
     // Ocultamos el modo discoteca
     for (let i = 0; i < discoteca.length; i++){
         discoteca[i].style.display = 'none';
@@ -244,6 +274,7 @@ function comeKebab(){
         if (puntuacion == 100 || puntuacion == 200 || puntuacion == 300){
             ricardo.style.width = (ricardo.offsetWidth + 6) + 'px';
             ricardo.style.height = (ricardo.offsetHeight + 6) + 'px';
+            tamanyoRicardo += 6;
         }
         // Si la puntuación es mayor a 500, tendremos medio segundo menos para conseguir el kebab
         if (puntuacion == 500){
@@ -272,17 +303,20 @@ function resetea(event){
     clearInterval(intervaloTimerKebab);
 
     // Quitamos el kebab y su Timeout
-    kebab.style.display = 'none';
     clearTimeout(desapareceKebab);
+    kebab.style.display = 'none';
 
     // Reiniciamos el contador de puntos y el número de kebabs
     contador.textContent = contador.textContent.split(':')[0] + ': 0 pts';
     contadorKebabs = 0;
 
     // Reiniciamos la posición de Ricardo y su tamaño
-    ricardo.style.left = 20 + 'px';
-    ricardo.style.top = altoZonaJuego - 60 + 'px';
     let tamanyoRicardo = 30;
+    ricardo.style.left = 60 + 'px';
+    ricardo.style.top = altoZonaJuego - 80 + 'px';
+
+    ricardo.style.width = tamanyoRicardo + 'px';
+    ricardo.style.height = tamanyoRicardo + 'px';
 
     // Reiniciamos las variables para kebabs y colisiones
     generandoKebabs = false;
@@ -292,3 +326,5 @@ function resetea(event){
 
 // Asignamos el evento al botón
 reset.addEventListener('click', resetea);
+
+
