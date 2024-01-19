@@ -85,14 +85,14 @@ reset.addEventListener('click', resetea);
 
 /* Personajes Ricardo */
 let personajes = [];
-personajes.push('../images/ricardo.png');
-personajes.push('../images/ricarda.png');
-personajes.push('../images/ricardios.png');
-personajes.push('../images/ricardo-elegante.png');
-personajes.push('../images/ricardo-fiestas.png');
-personajes.push('../images/ricardo-navidad.png');
-personajes.push('../images/ricardo-pelo.png');
-personajes.push('../images/ricardo-pixel.png');
+personajes.push('./images/ricardo.png');
+personajes.push('./images/ricarda.png');
+personajes.push('./images/ricardios.png');
+personajes.push('./images/ricardo-elegante.png');
+personajes.push('./images/ricardo-fiestas.png');
+personajes.push('./images/ricardo-navidad.png');
+personajes.push('./images/ricardo-pelo.png');
+personajes.push('./images/ricardo-pixel.png');
 
 // Comprobamos las cookies para saber si hay algún ricardo seleccionado
 let cookies = document.cookie;
