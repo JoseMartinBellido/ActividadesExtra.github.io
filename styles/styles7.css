@@ -111,12 +111,30 @@ nav a:hover {
 }
 
 /* Título y contador */
+header {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+}
+
+footer{
+    grid-column: 1 / 2;
+    grid-row: 4 / 5;
+}
+
+header, footer{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.discoteca{
+    display: none;
+    width: 50px;
+}
+
 h1{
     font-family: var(--fuente-principal);
     text-align: center;
-
-    grid-column: 1 / 2;
-    grid-row: 1 / 2;
 }
 
 #contador{
@@ -147,25 +165,26 @@ h1{
 
 #cuadro-informacion h2{
     text-align: center;
-    font-size: 1.7rem;
+    font-size: 1.9rem;
     display: inline;
 }
 
 #cuadro-informacion p{
     text-align: center;
+    font-size: 1.2rem;
 }
 
 #cuadro-informacion ul{
     display: flex;
     flex-direction: column;
-    gap: 2rem;
-    line-height: 1.8rem;
+    gap: 1.8rem;
+    line-height: 1.6rem;
+    font-size: 1.0rem;
 }
 
 #cuadro-informacion p, #cuadro-informacion li{
-    width: 60vw;
+    width: 70vw;
     font-weight: bold;
-    font-size: 1.0rem;
 }
 
 /* Zona de juego */

@@ -14,6 +14,9 @@ const zonaJuego = document.getElementById('zona-juego');
 let altoZonaJuego = zonaJuego.offsetHeight;
 let anchoZonaJuego = zonaJuego.offsetWidth;
 
+// Modo discoteca
+let discoteca = document.getElementsByClassName('discoteca');
+
 /* ---------------------- Menú emergente de navegación ---------------------- */
 let abierto = false;
 
@@ -86,8 +89,9 @@ let finJuego = false;
 let intervaloTimerKebab;
 let timerCaduca;
 let generandoKebabs = false;
-let tiempo_kebab = 4 * 1000;
-
+let tiempo_kebab = 3 * 1000;
+let contadorKebabsPerdidos = 0;
+let maximo_kebabs_sin_comer = 2;
 let contadorKebabs = 0;
 
 let bordeRicardo;
@@ -114,12 +118,20 @@ function asignaInicio(){
 
 // Función que comienza el juego (y lo finaliza con una colisión)
 function comienzaJuego(event){
+
     // Bordes de ricardo
     bordeRicardo = ricardo.getBoundingClientRect();
 
-    // Nueva posición de ricardo
-    ricardo.style.left = 'calc( ' + event.clientX + 'px - 10vw)';
-    ricardo.style.top = 'calc( ' + event.clientY + 'px - 17vh)';;
+    // Nueva posición de ricardo solo si no ha perdido ya
+    if (!finJuego){
+            // Activamos el modo discoteca
+    for (let i = 0; i < discoteca.length; i++){
+        discoteca[i].style.display = 'inline';
+    }
+
+        ricardo.style.left = 'calc( ' + event.clientX + 'px - 10vw)';
+        ricardo.style.top = 'calc( ' + event.clientY + 'px - 17vh)';;
+    }
 
     // Comprobamos nuestro array de bordes de los muros. Además, comprobamos los bordes de la zona de juego
     if (ricardo.offsetTop <= 0 || (ricardo.offsetTop + tamanyoRicardo) >= altoZonaJuego
@@ -151,7 +163,7 @@ function comienzaJuego(event){
 }
 
 // Función que se encarga de finalizar el juego
-function finalizaJuego(event){
+function finalizaJuego(){
     // Aviso al usuario
     alert('Ricardo se ha desmayado. No se despertará hasta mañana. Pero oye, ¡sus buenos ' + contadorKebabs + ' que se ha comido!');
     alert('Pulsa el botón de reset para volver a jugar.');
@@ -160,6 +172,10 @@ function finalizaJuego(event){
     main.removeEventListener('mousemove', comienzaJuego);
     // Paramos de mostrar kebabs
     clearInterval(intervaloTimerKebab);
+    // Ocultamos el modo discoteca
+    for (let i = 0; i < discoteca.length; i++){
+        discoteca[i].style.display = 'none';
+    }
 }
 
 function generaKebab(){
@@ -167,6 +183,11 @@ function generaKebab(){
     do{ 
         // el kebab es correcto de inicio y, si hay colisión, será false
         kebabCorrecto = true;
+        // Lo añadimos a los kebabs perdidos y lo quitamos si se come
+        contadorKebabsPerdidos++;
+        if (contadorKebabsPerdidos == maximo_kebabs_sin_comer + 2){
+            finalizaJuego();
+        }
 
         kebab.style.left = Math.round(Math.random() * (anchoZonaJuego - tamanyoKebab)) + 'px';
         kebab.style.top = Math.round(Math.random() * (altoZonaJuego - tamanyoKebab)) + 'px';
@@ -192,7 +213,7 @@ function generaKebab(){
     timerCaduca = setTimeout(desapareceKebab, tiempo_kebab - 1000); 
 }
 
-function desapareceKebab(){
+function desapareceKebab(event){
     kebab.style.display = 'none';
 }
 
@@ -217,6 +238,8 @@ function comeKebab(){
             + puntuacion + ' pts';
         // Aumentamos la cantidad de kebabs comidos
         contadorKebabs++;
+        // Restablecemos el de los perdidos para no acumular
+        contadorKebabsPerdidos = 0;
         // Si la puntuación es 100, 200 o 300, aumentamos a ricardo
         if (puntuacion == 100 || puntuacion == 200 || puntuacion == 300){
             ricardo.style.width = (ricardo.offsetWidth + 6) + 'px';
@@ -224,9 +247,8 @@ function comeKebab(){
         }
         // Si la puntuación es mayor a 500, tendremos medio segundo menos para conseguir el kebab
         if (puntuacion == 500){
-            tiempo_kebab = 3200;
             clearInterval(intervaloTimerKebab);
-            intervaloTimerKebab = setInterval(generaKebab, tiempo_kebab);
+            intervaloTimerKebab = setInterval(generaKebab, tiempo_kebab - 600);
         }
 
     }
@@ -237,6 +259,12 @@ function comeKebab(){
 
 function resetea(event){
     finJuego = true;
+
+    // Ocultamos el modo discoteca
+    for (let i = 0; i < discoteca.length; i++){
+        discoteca[i].style.display = 'none';
+    }
+
     // Dejamos de arrastrar a ricardo por pantalla
     main.removeEventListener('mousemove', comienzaJuego);
 
@@ -259,6 +287,7 @@ function resetea(event){
     // Reiniciamos las variables para kebabs y colisiones
     generandoKebabs = false;
     finJuego = false;
+    contadorKebabsPerdidos = 0;
 }
 
 // Asignamos el evento al botón
