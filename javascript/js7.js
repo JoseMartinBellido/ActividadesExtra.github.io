@@ -41,11 +41,11 @@ function abreCierraNav(){
 
 /* Muros del juego */
 const muroGrande = document.getElementById('muro-grande');
-muroGrande.style.left = '6.5vw';
-muroGrande.style.top = '6.5vw';
+muroGrande.style.left = '7vw';
+muroGrande.style.top = '7vw';
 
 const muroMediano1 = document.getElementById('muro-mediano-1');
-muroMediano1.style.left = '35vw';
+muroMediano1.style.left = '37vw';
 muroMediano1.style.top = '18vw';
 
 const muroMediano2 = document.getElementById('muro-mediano-2');
@@ -69,11 +69,10 @@ const bordesMuros = [muroGrande.getBoundingClientRect(), muroMediano1.getBoundin
 const ricardo = document.getElementById('ricardo');
 ricardo.style.left = 60 + 'px';
 ricardo.style.top = altoZonaJuego - 80 + 'px';
-let tamanyoRicardo = 30;
 
 /* Kebab */
 const kebab = document.getElementById('kebab');
-let tamanyoKebab = 40;
+const tamanyoKebab = 40;
 
 /* Contador */
 const contador = document.getElementById('contador');
@@ -96,7 +95,8 @@ personajes.push('./images/ricardo-pixel.png');
 
 // Comprobamos las cookies para saber si hay algún ricardo seleccionado
 let cookies = document.cookie;
-if (cookies !== ''){
+
+if (cookies != ''){
     let arrayCookies = cookies.split(';');
     for (let i = 0; i < arrayCookies.length; i++){
         if (arrayCookies[i].includes('ricardo')){
@@ -110,11 +110,15 @@ if (cookies !== ''){
 La lógica es la siguiente: Le añado un evento de click a ricardo que solo funciona 1 vez hasta darle a reset.
 El evento de click le añade, a su vez, un evento de mousemove que actualiza sus coordenadas con el ratón.
 Mientras se mueve ricardo, se calculan los límites y se comprueban colisiones
-Si hay colisión, se acaba el juego
+Si hay colisión, se acaba el juego. Cuando se pasan 2 kebabs sin comérselos, acaba igualmente
 */
 
 /* Variables del juego*/
+
+// Necesitamos de un booleano que indique el fin del juego
+//  Mientras ricardo choque contra un muro, tendremos un bucle infinito por colisión
 let finJuego = false;
+
 let intervaloTimerKebab;
 let timerCaduca;
 let generandoKebabs = false;
@@ -122,6 +126,9 @@ let tiempo_kebab = 3 * 1000;
 let contadorKebabsPerdidos = 0;
 let maximo_kebabs_sin_comer = 2;
 let contadorKebabs = 0;
+
+let tamanyoRicardo = 30;
+const aumento = 7;
 
 let bordeRicardo;
 let bordeKebab;
@@ -143,7 +150,7 @@ function asignaInicio(){
 
 }
 
-// Función que comienza el juego (y lo finaliza con una colisión)
+// Función que comienza el juego y comprueba colisiones
 function comienzaJuego(event){
 
     // Bordes de ricardo
@@ -151,32 +158,39 @@ function comienzaJuego(event){
 
     // Nueva posición de ricardo solo si no ha perdido ya
     if (!finJuego){
-            // Activamos el modo discoteca
-    for (let i = 0; i < discoteca.length; i++){
-        discoteca[i].style.display = 'inline';
-    }
-    ricardo.style.left = (event.clientX - divBotones.offsetWidth) + 'px';
-    ricardo.style.top = (event.clientY - divBotones.offsetTop - (ricardo.offsetHeight / 2)) + 'px'; 
+        // Activamos el modo discoteca
+        for (let i = 0; i < discoteca.length; i++){
+            discoteca[i].style.display = 'inline';
+        }
+        ricardo.style.left = (event.clientX - divBotones.offsetWidth) + 'px';
+        ricardo.style.top = (event.clientY - divBotones.offsetTop - (ricardo.offsetHeight / 2)) + 'px'; 
 
     }
 
-    // Comprobamos nuestro array de bordes de los muros. Además, comprobamos los bordes de la zona de juego
+    // Comprobamos si hay colisión con los bordes o los muros
+    compruebaColision(event);
+
+    // Comprobamos si hay colisión con el kebab
+    comeKebab();
+}
+
+function compruebaColision(event){
+    // Comprobamos los bordes de la zona de juego
     if (ricardo.offsetTop <= 0 || (ricardo.offsetTop + tamanyoRicardo) >= altoZonaJuego
         || ricardo.offsetLeft <= 0 || (ricardo.offsetLeft + tamanyoRicardo) >= anchoZonaJuego){
-
+        // Si el juego no ha acabado ya, finalizamos
         if (!finJuego){
             finalizaJuego(event);
         }
 
     } else {
+        // Comprobamos nuestro array de bordes de los muros. 
         for (let i = 0; i < bordesMuros.length; i++){
 
             let borde = bordesMuros[i];
     
             if (bordeRicardo.top <= borde.bottom && bordeRicardo.left <= borde.right
                 && bordeRicardo.bottom >= borde.top && bordeRicardo.right >= borde.left){
-                    // Necesitamos de un booleano que indique el fin del juego
-                    //  Mientras ricardo choque contra un muro, tendremos un bucle infinito por colisión
                     if (!finJuego){
                         finalizaJuego(event);
                     }
@@ -184,9 +198,6 @@ function comienzaJuego(event){
                 }
         }
     }
-
-    // Comprobamos si hay colisión con el kebab
-    comeKebab();
 }
 
 // Función que se encarga de finalizar el juego
@@ -194,6 +205,7 @@ function finalizaJuego(){
     // Aviso al usuario
     alert('Ricardo se ha desmayado. No se despertará hasta mañana. Pero oye, ¡sus buenos ' + contadorKebabs + ' que se ha comido!');
     alert('Pulsa el botón de reset para volver a jugar.');
+    // Cambio de variable fin del juego
     finJuego = true;
     // Dejamos de arrastrar a ricardo por pantalla
     main.removeEventListener('mousemove', comienzaJuego);
@@ -209,18 +221,22 @@ function finalizaJuego(){
 }
 
 function generaKebab(){
+
+    // Lo añadimos a los kebabs perdidos y lo quitamos si se come
+    contadorKebabsPerdidos++;
+    console.log(contadorKebabsPerdidos);
+    if (contadorKebabsPerdidos == maximo_kebabs_sin_comer + 1){
+        finalizaJuego();
+    }
+    
     let kebabCorrecto = true;
+
     do{ 
         // el kebab es correcto de inicio y, si hay colisión, será false
         kebabCorrecto = true;
-        // Lo añadimos a los kebabs perdidos y lo quitamos si se come
-        contadorKebabsPerdidos++;
-        if (contadorKebabsPerdidos == maximo_kebabs_sin_comer + 2){
-            finalizaJuego();
-        }
 
-        kebab.style.left = Math.round(Math.random() * (anchoZonaJuego - tamanyoKebab)) + 'px';
-        kebab.style.top = Math.round(Math.random() * (altoZonaJuego - tamanyoKebab)) + 'px';
+        kebab.style.left = Math.round(Math.random() * (anchoZonaJuego - (tamanyoKebab * 1.5))) + 'px';
+        kebab.style.top = Math.round(Math.random() * (altoZonaJuego - (tamanyoKebab * 1.5))) + 'px';
 
         kebab.style.display = 'block';
 
@@ -260,30 +276,29 @@ function comeKebab(){
         // En caso correcto, quitamos el kebab y su Timeout
         kebab.style.display = 'none';
         clearTimeout(desapareceKebab);
+
         // Añadimos la puntuación al contador de puntos
         let arrayTextoContador = contador.textContent.split(':'); 
         // Desglosamos el texto para quedarnos con el número y sumar la puntuación nueva
         let puntuacion = Number(arrayTextoContador[1].substring(1, arrayTextoContador[1].length - 4)) + 25;
-        contador.textContent = arrayTextoContador[0] + ': ' 
-            + puntuacion + ' pts';
+        contador.textContent = arrayTextoContador[0] + ': ' + puntuacion + ' pts';
+
         // Aumentamos la cantidad de kebabs comidos
         contadorKebabs++;
         // Restablecemos el de los perdidos para no acumular
         contadorKebabsPerdidos = 0;
         // Si la puntuación es 100, 200 o 300, aumentamos a ricardo
         if (puntuacion == 100 || puntuacion == 200 || puntuacion == 300){
-            ricardo.style.width = (ricardo.offsetWidth + 6) + 'px';
-            ricardo.style.height = (ricardo.offsetHeight + 6) + 'px';
-            tamanyoRicardo += 6;
-        }
+            ricardo.style.width = (ricardo.offsetWidth + aumento) + 'px';
+            ricardo.style.height = (ricardo.offsetHeight + aumento) + 'px';
+            tamanyoRicardo += aumento;
+
         // Si la puntuación es mayor a 500, tendremos medio segundo menos para conseguir el kebab
-        if (puntuacion == 500){
+        } else if (puntuacion == 500){
             clearInterval(intervaloTimerKebab);
             intervaloTimerKebab = setInterval(generaKebab, tiempo_kebab - 600);
         }
-
     }
-
 }
 
 /* Función del botón de reset */
@@ -324,7 +339,6 @@ function resetea(event){
     contadorKebabsPerdidos = 0;
 }
 
-// Asignamos el evento al botón
-reset.addEventListener('click', resetea);
+
 
 
