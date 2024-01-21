@@ -57,7 +57,7 @@ function agregaImagen(){
     let coordenadaY = Math.round(Math.random() * (altoZona - altoMayorImagenes));
 
     // Añadimos los atributos a la imagen
-    img.src = `../images/juego-imagenes-${numImagen}.jpg`;
+    img.src = `./images/juego-imagenes-${numImagen}.jpg`;
     img.style.position = 'absolute';
     img.style.left = coordenadaX.toString() + 'px';
     img.style.top = coordenadaY.toString() + 'px';
