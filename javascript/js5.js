@@ -10,7 +10,7 @@ const altoMayorImagenes = 256;
 
 //Cantidad de imágenes
 const CANTIDAD_IMAGENES = 5;
-const VELOCIDAD_IMAGEN = 700;
+const VELOCIDAD_IMAGEN = 900;
 const TIEMPO_JUEGO = 20;
 
 // Imagen
